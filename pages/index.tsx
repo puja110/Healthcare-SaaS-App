@@ -1,5 +1,4 @@
-"use client"; // To make sure it runs in the browser; cause we are using python FastAPI server (not Next.js middleman server)
-
+"use client"; // To make sure it runs in the browser; making direct API calls from the browser to our Python FastAPI backend (rather than using Next.js as a middleman server).
 import { useEffect, useState } from "react";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
