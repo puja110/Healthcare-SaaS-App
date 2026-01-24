@@ -1,5 +1,9 @@
 node_modules/
+.next/dev/
 .env
-env/
-venv/
-myenv/
+
+# Python virtual environment
+api/venv/
+api/.venv/
+api/__pycache__/
+*.pyc
