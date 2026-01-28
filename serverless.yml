@@ -1,0 +1,54 @@
+service: consultation-app
+
+provider:
+  name: aws
+  runtime: python3.12
+  region: us-east-2
+  stage: ${opt:stage, 'dev'}
+  memorySize: 1024 # Increased memory
+  timeout: 29 # Just under 30s limit
+
+  deploymentBucket:
+    name: consultation-app-deploy-bucket-590288364597
+
+  environment:
+    OPENAI_API_KEY: ${env:OPENAI_API_KEY}
+
+  iam:
+    role:
+      statements:
+        - Effect: Allow
+          Action:
+            - logs:CreateLogGroup
+            - logs:CreateLogStream
+            - logs:PutLogEvents
+          Resource: "*"
+
+functions:
+  api:
+    handler: api/lambda_handler.handler
+    events:
+      - httpApi:
+          path: /{proxy+}
+          method: ANY
+      - httpApi:
+          path: /
+          method: ANY
+
+custom:
+  pythonRequirements:
+    dockerizePip: true
+    slim: true # Remove unnecessary files
+    strip: true # Strip .so files
+    zip: true # Zip individually
+    layer: false
+    useStaticCache: false
+    useDownloadCache: false
+    # Only include necessary packages
+    noDeploy:
+      - pytest
+      - boto3
+      - botocore
+      - pip
+      - setuptools
+      - wheel

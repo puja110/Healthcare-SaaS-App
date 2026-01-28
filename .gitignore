@@ -7,3 +7,6 @@ api/venv/
 api/.venv/
 api/__pycache__/
 *.pyc
+.vercel
+.serverless/
+.next/
