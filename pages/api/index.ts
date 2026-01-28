@@ -4,18 +4,25 @@ export default async function handler(
   req: NextApiRequest,
   res: NextApiResponse,
 ) {
+  // Only allow POST requests
+  if (req.method !== "POST") {
+    return res.status(405).json({ error: "Method not allowed" });
+  }
+
   // Set headers for Server-Sent Events
   res.setHeader("Content-Type", "text/event-stream");
   res.setHeader("Cache-Control", "no-cache, no-transform");
   res.setHeader("Connection", "keep-alive");
 
   try {
-    // Connect to your Python FastAPI backend
+    // Connect to your Python FastAPI backend with the request body
     const response = await fetch("http://localhost:8000/api", {
-      method: "GET",
+      method: "POST",
       headers: {
+        "Content-Type": "application/json",
         Accept: "text/event-stream",
       },
+      body: JSON.stringify(req.body),
     });
 
     if (!response.ok) {
