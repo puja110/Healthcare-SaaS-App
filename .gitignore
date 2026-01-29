@@ -10,3 +10,4 @@ api/__pycache__/
 .vercel
 .serverless/
 .next/
+.env*.local
