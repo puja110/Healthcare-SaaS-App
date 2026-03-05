@@ -72,14 +72,6 @@ IMPORTANT:
 - For the email section, write naturally with paragraphs and include bullet points for lists of instructions
 """
 
-# You are provided with notes written by a doctor from a patient's visit.
-# Your job is to summarize the visit for the doctor and provide an email.
-# Reply with exactly three sections with the headings:
-# ### Summary of visit for the doctor's records
-# ### Next steps for the doctor
-# ### Draft of email to patient in patient-friendly language
-# """
-
 def user_prompt_for(visit: Visit) -> str:
     return f"""Create the summary, next steps and draft email for:
 Patient Name: {visit.patient_name}
@@ -133,13 +125,9 @@ async def consultation_summary(visit: Visit):
                     if chunk.choices[0].delta.content:
                         text = chunk.choices[0].delta.content
                         print(f"Chunk {chunk_count}: {text[:50]}...")
-                        
-                        lines = text.split("\n")
-                        for line in lines[:-1]:
-                            yield f"data: {line}\n\n"
-                            yield "data:  \n\n"
-                        if lines[-1]:
-                            yield f"data: {lines[-1]}\n\n"
+                        # FIX: Encode newlines as \n token so SSE protocol doesn't lose them
+                        encoded = text.replace("\n", "\\n")
+                        yield f"data: {encoded}\n\n"
                 
                 print(f"Stream completed. Total chunks: {chunk_count}")
                 

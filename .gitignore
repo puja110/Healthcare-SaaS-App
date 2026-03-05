@@ -11,3 +11,4 @@ api/__pycache__/
 .serverless/
 .next/
 .env*.local
+.DS_Store
