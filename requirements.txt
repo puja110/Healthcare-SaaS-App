@@ -5,3 +5,10 @@ python-dotenv
 fastapi-cors
 pydantic
 mangum
+openai-whisper
+pydub
+ffmpeg-python
+librosa
+soundfile
+numpy
+python-multipart
