@@ -1,14 +1,19 @@
 import os
-from fastapi import FastAPI
+from fastapi import FastAPI, File, UploadFile, Form
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import StreamingResponse
 from pydantic import BaseModel
 from openai import OpenAI
 import traceback
 from dotenv import load_dotenv
+from typing import Optional
+import tempfile
+import whisper
 
 # Load environment variables from .env file
-load_dotenv()
+# load_dotenv()
+load_dotenv(dotenv_path=os.path.join(os.path.dirname(__file__), '..', '.env'))
+
 
 app = FastAPI()
 
@@ -20,6 +25,11 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+# Load Whisper model on startup
+print("Loading Whisper model for voice transcription...")
+whisper_model = whisper.load_model("base")
+print("Whisper model loaded successfully")
 
 
 class Visit(BaseModel):
@@ -125,3 +135,116 @@ async def consultation_summary(visit: Visit):
         error_msg = f"Error: {str(e)}\n{traceback.format_exc()}"
         print(error_msg)
         return {"error": str(e)}, 500
+    
+@app.post("/api/consultation/voice")
+async def process_voice_consultation(
+    audio: UploadFile = File(...),
+    conversation_id: Optional[str] = Form(None),
+    organization_id: str = Form("demo_org"),
+    mode: str = Form("auto")
+):
+    """
+    Process voice consultation recording
+    
+    Args:
+        audio: Audio file (webm, mp3, wav, m4a)
+        conversation_id: Optional conversation ID
+        organization_id: Organization identifier
+        mode: Processing mode (auto/knowledge_base/web_search)
+    
+    Returns:
+        Transcription and AI response
+    """
+    try:
+        print(f"\nVoice consultation request received")
+        print(f"Organization: {organization_id}")
+        print(f"Audio filename: {audio.filename}")
+        print(f"Content type: {audio.content_type}")
+        
+        # Save uploaded file temporarily
+        temp_dir = tempfile.gettempdir()
+        temp_audio_path = os.path.join(temp_dir, audio.filename)
+        
+        with open(temp_audio_path, "wb") as buffer:
+            content = await audio.read()
+            buffer.write(content)
+        
+        print(f"Audio saved to: {temp_audio_path}")
+        print(f"File size: {len(content)} bytes")
+        
+        # Transcribe audio using Whisper
+        print("Transcribing audio with Whisper...")
+        try:
+            result = whisper_model.transcribe(temp_audio_path)
+            transcribed_text = result["text"].strip()
+            print(f"Transcription successful: {transcribed_text[:100]}...")
+        except Exception as e:
+            print(f"Transcription error: {str(e)}")
+            os.remove(temp_audio_path)
+            return {
+                "success": False,
+                "error": f"Failed to transcribe audio: {str(e)}"
+            }
+        
+        # Clean up temporary file
+        os.remove(temp_audio_path)
+        
+        if not transcribed_text:
+            return {
+                "success": False,
+                "error": "No speech detected in audio"
+            }
+        
+        # TODO: Integrate with your existing chat/consultation service
+        # Replace this placeholder with actual implementation
+        ai_response = await process_consultation_text(
+            transcribed_text,
+            conversation_id,
+            organization_id,
+            mode
+        )
+        
+        return {
+            "success": True,
+            "transcription": transcribed_text,
+            "response": ai_response.get("answer"),
+            "sources": ai_response.get("sources", []),
+            "mode_used": ai_response.get("mode_used"),
+            "conversation_id": ai_response.get("conversation_id"),
+            "timestamp": ai_response.get("timestamp")
+        }
+        
+    except Exception as e:
+        print(f"Error processing voice consultation: {str(e)}")
+        import traceback
+        traceback.print_exc()
+        
+        return {
+            "success": False,
+            "error": "Failed to process voice consultation",
+            "details": str(e)
+        }
+
+async def process_consultation_text(text, conversation_id, organization_id, mode):
+    """
+    Process consultation message through your existing service
+    TODO: Replace with actual implementation
+    """
+    from datetime import datetime
+    
+    # Placeholder - integrate with your actual consultation service
+    return {
+        "answer": f"Consultation received: {text}",
+        "sources": [],
+        "mode_used": mode,
+        "conversation_id": conversation_id or f"conv_{datetime.now().timestamp()}",
+        "timestamp": datetime.now().isoformat()
+    }
+
+@app.get("/health")
+def health_check():
+    return {
+        "status": "healthy",
+        "whisper_loaded": True,
+        "openai_key_configured": bool(os.getenv("OPENAI_API_KEY"))
+    }
