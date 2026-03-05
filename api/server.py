@@ -7,9 +7,14 @@ from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 from openai import OpenAI
 from dotenv import load_dotenv
+import uvicorn
 
 # Load environment variables
-load_dotenv()
+# load_dotenv()
+load_dotenv(dotenv_path=os.path.join(os.path.dirname(__file__), '..', '.env'))
+
+# Import app after loading env
+from api.index import app
 
 app = FastAPI()
 
@@ -126,7 +131,20 @@ static_path = Path("static")
 if static_path.exists():
     app.mount("/", StaticFiles(directory="static", html=True), name="static")
 
-
+if __name__ == "__main__":
+    print("=" * 60)
+    print("Starting FastAPI server with voice consultation support")
+    print("=" * 60)
+    print(f"OpenAI API Key configured: {bool(os.getenv('OPENAI_API_KEY'))}")
+    print(f"Server URL: http://localhost:3000")
+    print("=" * 60)
+    
+    uvicorn.run(
+        "api.index:app",
+        host="0.0.0.0",
+        port=8000,
+        reload=True
+    )
 
 # import os
 # from pathlib import Path

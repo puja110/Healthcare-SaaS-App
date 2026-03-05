@@ -6,8 +6,13 @@ from pydantic import BaseModel
 from openai import OpenAI
 from mangum import Mangum
 
-# Remove: from dotenv import load_dotenv
+from dotenv import load_dotenv
 # Remove: load_dotenv()
+
+# Load environment variables from root .env for local testing
+if os.path.exists(os.path.join(os.path.dirname(__file__), '..', '.env')):
+    load_dotenv(dotenv_path=os.path.join(os.path.dirname(__file__), '..', '.env'))
+
 
 app = FastAPI()
 
@@ -110,7 +115,9 @@ def consultation_summary(visit: Visit):
 # Lambda handler
 handler = Mangum(app, lifespan="off")
 
-
+# Ensure temp directory exists for audio files
+if not os.path.exists('/tmp'):
+    os.makedirs('/tmp')
 
 # import os
 # from fastapi import FastAPI
