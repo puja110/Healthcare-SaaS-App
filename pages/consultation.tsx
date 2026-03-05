@@ -56,11 +56,15 @@ export default function VoiceConsultation() {
       formData.append('organization_id', 'demo_org');
       formData.append('mode', 'auto');
       
-      const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
-      const response = await fetch(`${apiUrl}/api/consultation/voice`, {
+    //   const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000';
+    //   const response = await fetch(`${apiUrl}/api/consultation/voice`, {
+    //     method: 'POST',
+    //     body: formData,
+    //   });
+        const response = await fetch('http://localhost:8000/api/consultation/voice', {  // ← 8000
         method: 'POST',
         body: formData,
-      });
+        });
       
       const data = await response.json();
       

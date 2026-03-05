@@ -20,7 +20,7 @@ export default async function handler(
   }
 
   try {
-    const lambdaUrl = process.env.LAMBDA_API_URL || "http://localhost:8000";
+    const lambdaUrl = process.env.LAMBDA_API_URL || "http://localhost:3000";
 
     console.log("Calling Lambda API:", lambdaUrl);
 
