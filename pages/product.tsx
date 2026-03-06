@@ -1,6 +1,8 @@
 import { useState, useRef } from 'react';
 import SummaryDisplay from '../components/SummaryDisplay';
 
+const API_URL = process.env.LAMBDA_API_URL || 'http://localhost:8000';
+
 export default function Product() {
   const [patientName, setPatientName] = useState('');
   const [dateOfVisit, setDateOfVisit] = useState(new Date().toISOString().split('T')[0]);
@@ -67,7 +69,7 @@ export default function Product() {
       formData.append('organization_id', 'demo_org');
       formData.append('mode', 'auto');
 
-      const response = await fetch('http://localhost:8000/api/consultation/voice', {
+      const response = await fetch(`${API_URL}/api/consultation/voice`, {
         method: 'POST',
         body: formData,
       });
@@ -85,7 +87,7 @@ export default function Product() {
 
     } catch (error) {
       console.error('Error details:', error);
-      alert('Failed to process voice recording. Make sure backend is running on http://localhost:8000');
+      alert('Failed to process voice recording. Make sure backend is running on valid url');
     } finally {
       setIsProcessingAudio(false);
     }
@@ -110,7 +112,7 @@ export default function Product() {
     setSummaryKey(prev => prev + 1);
 
     try {
-      const response = await fetch('http://localhost:8000/api', {
+      const response = await fetch(`${API_URL}/api`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
