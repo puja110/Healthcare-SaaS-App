@@ -1,7 +1,7 @@
 import { useState, useRef } from 'react';
 import SummaryDisplay from '../components/SummaryDisplay';
 
-const API_URL = process.env.LAMBDA_API_URL || 'http://localhost:8000';
+const API_URL = process.env.NEXT_PUBLIC_LAMBDA_API_URL || 'http://localhost:8000';
 
 export default function Product() {
   const [patientName, setPatientName] = useState('');

@@ -12,3 +12,6 @@ api/__pycache__/
 .next/
 .env*.local
 .DS_Store
+
+.requirements.zip
+.serverless/

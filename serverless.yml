@@ -37,7 +37,7 @@ functions:
 
 custom:
   pythonRequirements:
-    dockerizePip: true
+    dockerizePip: false
     slim: true # Remove unnecessary files
     strip: true # Strip .so files
     zip: true # Zip individually
@@ -52,3 +52,27 @@ custom:
       - pip
       - setuptools
       - wheel
+
+package:
+  individually: false
+  exclude:
+    - .env
+    - .env.local
+    - "**/.env"
+    - "**/.env.local"
+    - api/venv/**
+    - api/.venv/**
+    - venv/**
+    - .venv/**
+    - node_modules/**
+    - .next/**
+    - pages/**
+    - components/**
+    - public/**
+    - static/**
+    - __pycache__/**
+    - "*.pyc"
+    - .git/**
+    - "*.md"
+    - "*.png"
+    - "*.jpg"
