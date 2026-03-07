@@ -1,37 +1,49 @@
-# Stage 1: Build the Next.js static files
-FROM node:22-alpine AS frontend-builder
-WORKDIR /app
+FROM public.ecr.aws/lambda/python:3.12
 
-# Copy package files first (for better caching)
-COPY package*.json ./
-RUN npm ci
-
-# Copy all frontend files
-COPY . .
-
-# Build the Next.js app (creates 'out' directory with static files)
-RUN npm run build
-
-# Stage 2: Create the final Python container
-FROM python:3.12-slim
-WORKDIR /app
-
-# Install Python dependencies
-COPY requirements.txt .
+# Copy requirements and install
+COPY api/requirements.txt ${LAMBDA_TASK_ROOT}/
 RUN pip install --no-cache-dir -r requirements.txt
 
-# Copy the FastAPI server
-COPY api/server.py .
+# Copy application code
+COPY api/lambda_handler.py ${LAMBDA_TASK_ROOT}/
 
-# Copy the Next.js static export from builder stage
-COPY --from=frontend-builder /app/out ./static
+# Set the handler
+CMD ["lambda_handler.handler"]
 
-# Health check
-HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
-  CMD python -c "import urllib.request; urllib.request.urlopen('http://localhost:8000/health')"
+# # Stage 1: Build the Next.js static files
+# FROM node:22-alpine AS frontend-builder
+# WORKDIR /app
 
-# Expose port 8000 (FastAPI will serve everything)
-EXPOSE 8000
+# # Copy package files first (for better caching)
+# COPY package*.json ./
+# RUN npm ci
 
-# Start the FastAPI server
-CMD ["uvicorn", "server:app", "--host", "0.0.0.0", "--port", "8000"]
+# # Copy all frontend files
+# COPY . .
+
+# # Build the Next.js app (creates 'out' directory with static files)
+# RUN npm run build
+
+# # Stage 2: Create the final Python container
+# FROM python:3.12-slim
+# WORKDIR /app
+
+# # Install Python dependencies
+# COPY requirements.txt .
+# RUN pip install --no-cache-dir -r requirements.txt
+
+# # Copy the FastAPI server
+# COPY api/server.py .
+
+# # Copy the Next.js static export from builder stage
+# COPY --from=frontend-builder /app/out ./static
+
+# # Health check
+# HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
+#   CMD python -c "import urllib.request; urllib.request.urlopen('http://localhost:8000/health')"
+
+# # Expose port 8000 (FastAPI will serve everything)
+# EXPOSE 8000
+
+# # Start the FastAPI server
+# CMD ["uvicorn", "server:app", "--host", "0.0.0.0", "--port", "8000"]

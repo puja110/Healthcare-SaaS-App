@@ -4,6 +4,18 @@ provider:
   name: aws
   runtime: python3.12
   region: us-east-2
+  httpApi:
+    cors:
+      allowedOrigins:
+        - https://healthcare-saas-app-kappa.vercel.app
+        - http://localhost:3000
+      allowedMethods:
+        - GET
+        - POST
+        - OPTIONS
+      allowedHeaders:
+        - Content-Type
+        - Authorization
   stage: ${opt:stage, 'dev'}
   memorySize: 1024 # Increased memory
   timeout: 29 # Just under 30s limit
