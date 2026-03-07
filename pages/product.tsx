@@ -80,7 +80,7 @@ export default function Product() {
 
       if (data.success) {
         setNotes(notes ? notes + '\n\n' + data.transcription : data.transcription);
-        alert('Voice transcription completed successfully!');
+        // alert('Voice transcription completed successfully!');
       } else {
         alert(`Transcription error: ${data.error}`);
       }
@@ -159,7 +159,7 @@ export default function Product() {
 
     } catch (error) {
       console.error('Error:', error);
-      alert('Failed to generate summary. Please try again.');
+      // alert('Failed to generate summary. Please try again.');
     } finally {
       setIsLoading(false);
     }
